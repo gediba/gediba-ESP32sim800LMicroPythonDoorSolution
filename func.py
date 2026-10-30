@@ -8,7 +8,7 @@ from time import sleep
 
 #physical limits, dont get past these
 MIN_SERVO = 3.1
-MAX_SERVO = 11.5
+MAX_SERVO = 11.2
 
 def load_config():
     with open("config.json", "r") as f:
@@ -24,16 +24,16 @@ SERVO_HOME = config["servo_home"]
 SERVO_END = config["servo_end"]
 
 servo = PWM(Pin(14), freq=50)
-servo.duty(config["servo_home"])
+servo.duty(SERVO_END)
 
 def invoke_button_press():
+    servo.duty(SERVO_END)
+    sleep(1.5)
+
     servo.duty(SERVO_HOME)
     sleep(1)
 
     servo.duty(SERVO_END)
-    sleep(1)
-
-    servo.duty(SERVO_HOME)
     sleep(1)
 
 def gsm_module_power():
@@ -102,7 +102,7 @@ def net_quality():
     return round(res * 100 / 31)
 
 
-def command_sms(ADMIN_NUMBERS, boot_at):
+def status_sms(ADMIN_NUMBERS, boot_at):
     indexes = gsm.checkSMS(status=gsm.SMS_UNREAD)
 
     if indexes:
@@ -171,7 +171,7 @@ def set_servo_end(admin_phone_number, servo_end):
         gsm.sendSMS(admin_phone_number, "Wrong value. Must be float compatible.")
         return
 
-    if servo_end == config['servo_end']
+    if servo_end == config['servo_end']:
         gsm.sendSMS(admin_phone_number, "Same value exists. No changes made.")
         return    
     
@@ -183,7 +183,7 @@ def set_servo_end(admin_phone_number, servo_end):
         gsm.sendSMS(admin_phone_number, "END <= HOME???")
         return
     
-    config['servo_end'] = servo_end:
+    config['servo_end'] = servo_end
     save_config(config)
     
     gsm.sendSMS(admin_phone_number, "New SERVO_END set to: " + str(servo_end))
@@ -334,7 +334,7 @@ def loop(BLOCKED_NUMBERS, ADMIN_NUMBERS, boot_at):
         
         loop_index += 1
         if loop_index >= 6: # check sms every 6 loops (~3 secs)
-            command_sms(ADMIN_NUMBERS, boot_at)
+            status_sms(ADMIN_NUMBERS, boot_at)
             loop_index = 0
 
         print("*", end="")
